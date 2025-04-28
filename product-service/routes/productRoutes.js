@@ -11,5 +11,6 @@ const { seedProducts } = require('../controllers/seedController');
 // router.post('/seed', seedProducts);
 router.get('/', getProducts);
 router.get('/:id', getProductById);
+router.put('/:id/stock', updateStock);
 
 module.exports = router;

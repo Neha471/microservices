@@ -72,16 +72,32 @@ exports.getProductById = async (req, res) => {
   }
 };
 
-// Update stock
+// Update or reduce stock
 exports.updateStock = async (req, res) => {
-  const { stock } = req.body;
+  const {reduceBy}=req.body;
+  
+  if(typeof reduceBy === 'number'){
+  	return res.status(400).json({
+    	message: "Invalid stock unit"
+    })
+  }
+  
   try {
-    const product = await Product.findByIdAndUpdate(
-      req.params.id,
-      { $set: { availableStock: stock } },
-      { new: true }
-    );
-    res.json(product);
+    let product = await Product.findById(req.params.id);
+    if (!product) 
+    	return res.status(404).json({ message: 'Product not found' });
+
+    // Reduce stock by amount
+    if (typeof reduceBy === 'number') {
+      if (product.availableStock < reduceBy) {
+        return res.status(400).json({ message: 'Insufficient stock' });
+      }
+      product.availableStock -= reduceBy;
+      await product.save();
+      return res.json({ success: true, availableStock: product.availableStock });
+    }
+
+    res.status(400).json({ error: 'No valid stock operation provided' });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
