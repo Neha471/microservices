@@ -75,8 +75,7 @@ exports.getProductById = async (req, res) => {
 // Update or reduce stock
 exports.updateStock = async (req, res) => {
   const {reduceBy}=req.body;
-  
-  if(typeof reduceBy === 'number'){
+    if(typeof reduceBy !== 'number'){
   	return res.status(400).json({
     	message: "Invalid stock unit"
     })
