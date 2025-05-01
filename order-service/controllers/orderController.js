@@ -107,3 +107,13 @@ exports.getOrderById = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+exports.getOrdersByUserId = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const orders = await Order.find({ user: userId }); // Adjust field name if needed
+    res.status(200).json(orders);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching orders', error });
+  }
+};
