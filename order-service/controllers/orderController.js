@@ -7,7 +7,7 @@ exports.placeOrder = async (req, res) => {
     const { userId } = req.body;
     const axios = require('axios');
     // 1. Get cart items from cart service
-    const cartRes = await axios.get(`http://localhost:5002/api/cart/${userId}`);
+    const cartRes = await axios.get(`http://cart-service:5002/api/cart/${userId}`);
     const cart = cartRes.data;
     if (!cart.items.length) return res.status(400).json({ message: 'Cart is empty' });
 
@@ -56,14 +56,14 @@ exports.placeOrder = async (req, res) => {
     // Notify notification service on order result
     if (orderStatus === 'Confirmed') {
       try {
-        await axios.post('http://localhost:5010/api/notifications/log', {
+        await axios.post('http://notification-service:5010/api/notifications/log', {
           user: userId,
           order: order._id,
           message: `Order #${order._id} placed successfully!`,
           status: 'Confirmed',
         });
         // Also log a system notification
-        await axios.post('http://localhost:5010/api/notifications/log', {
+        await axios.post('http://notification-service:5010/api/notifications/log', {
           user: null,
           order: order._id,
           message: `Order #${order._id} was placed by user ${userId}.`,
@@ -74,14 +74,14 @@ exports.placeOrder = async (req, res) => {
       }
     } else if (orderStatus === 'Cancelled') {
       try {
-        await axios.post('http://localhost:5010/api/notifications/log', {
+        await axios.post('http://notification-service:5010/api/notifications/log', {
           user: userId,
           order: order._id,
           message: `Order #${order._id} was cancelled due to payment failure or other issues.`,
           status: 'Cancelled',
         });
         // Also log a system notification
-        await axios.post('http://localhost:5010/api/notifications/log', {
+        await axios.post('http://notification-service:5010/api/notifications/log', {
           user: null,
           order: order._id,
           message: `Order #${order._id} for user ${userId} was cancelled.`,

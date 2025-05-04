@@ -47,7 +47,7 @@ exports.fetchOrderInfo = async (req, res) => {
   try {
     const { orderId } = req.params;
     // Set the correct port for your order-service below (default 5003 used as example)
-    const orderServiceUrl = `http://localhost:5003/api/orders/${orderId}`;
+    const orderServiceUrl = `http://order-service:5003/api/orders/${orderId}`;
     const response = await axios.get(orderServiceUrl);
     res.json(response.data);
   } catch (err) {
@@ -79,7 +79,7 @@ exports.getUserOrderStatuses = async (req, res) => {
     const results = await Promise.all(Object.entries(orderStatusMap).map(async ([order, statuses]) => {
       let orderDetails = null;
       try {
-        const orderServiceUrl = `http://localhost:5003/api/orders/${order}`;
+        const orderServiceUrl = `http://order-service:5003/api/orders/${order}`;
         const response = await axios.get(orderServiceUrl);
         orderDetails = response.data;
       } catch (err) {

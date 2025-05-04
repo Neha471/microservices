@@ -3,6 +3,37 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const { createProxyMiddleware } = require("http-proxy-middleware");
+//service discovery registration
+const Consul = require('consul');
+// const consul = new Consul();
+const consul = new Consul({ host: process.env.CONSUL_HOST || 'consul', port: process.env.CONSUL_PORT || 8500 });
+
+const serviceName = 'api-gateway';
+const serviceId = serviceName + '-' + process.pid;
+const servicePort = process.env.PORT || 4000;
+const serviceHost = process.env.HOST || 'localhost';
+
+consul.agent.service.register({
+  name: serviceName,
+  id: serviceId,
+  address: serviceHost,
+  port: parseInt(servicePort, 10),
+  check: {
+    http: `http://${serviceHost}:${servicePort}/health`,
+    interval: '10s'
+  }
+}, (err) => {
+  if (err) throw err;
+  console.log(`${serviceName} registered with Consul`);
+});
+
+process.on('SIGINT', () => {
+  consul.agent.service.deregister(serviceId, () => {
+    console.log(`${serviceName} deregistered from Consul`);
+    process.exit();
+  });
+});
+//service discovery registration
 
 // Create an instance of Express app
 const app = express();
@@ -14,27 +45,28 @@ app.use(helmet()); // Add security headers
 app.use(morgan("combined")); // Log HTTP requests
 app.disable("x-powered-by"); // Hide Express server information
 
+
 // Define routes and corresponding microservices
 const services = [
     {
       route: "/api/auth",
-      target: "http://localhost:5000/api/auth",
+      target: "http://auth-service:5000/api/auth",
     },
     {
       route: "/api/products",
-      target: "http://localhost:5001/api/products",
+      target: "http://product-service:5001/api/products",
     },
     {
       route: "/api/cart",
-      target: "http://localhost:5002/api/cart/",
+      target: "http://cart-service:5002/api/cart/",
     },
     {
       route: "/api/orders",
-      target: "http://localhost:5003/api/orders/",
+      target: "http://order-service:5003/api/orders/",
     },
     {
       route: "/api/notifications",
-      target: "http://localhost:5010/api/notifications/",
+      target: "http://notification-service:5010/api/notifications/",
     },
     // Add more services as needed either deployed or locally.
    ];
@@ -103,6 +135,7 @@ services.forEach(({ route, target }) => {
   // Apply rate limiting and timeout middleware before proxying
   app.use(route, rateLimitAndTimeout, createProxyMiddleware(proxyOptions));
 });
+app.get('/health', (req, res) => res.send('OK'));
 
 // Define port for Express server
 const PORT = process.env.PORT || 4000;
