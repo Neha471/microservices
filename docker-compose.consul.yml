@@ -15,7 +15,7 @@ services:
       - mongo-data:/data/db
 
   api-gateway:
-    build: ./api-gateway
+    image: neha531/ecommerce-app-api-gateway:latest
     ports:
       - "4000:4000"
     environment:
@@ -34,7 +34,7 @@ services:
       - payment-service
 
   auth-service:
-    build: ./auth-service
+    image: neha531/ecommerce-app-auth-service:latest
     ports:
       - "5000:5000"
     environment:
@@ -48,7 +48,7 @@ services:
       - mongo
 
   product-service:
-    build: ./product-service
+    image: neha531/ecommerce-app-product-service:latest
     ports:
       - "5001:5001"
     environment:
@@ -60,7 +60,7 @@ services:
       - consul
 
   cart-service:
-    build: ./cart-service
+    image: neha531/ecommerce-app-cart-service:latest
     ports:
       - "5002:5002"
     environment:
@@ -72,7 +72,7 @@ services:
       - consul
 
   inventory-service:
-    build: ./inventory-service
+    image: neha531/ecommerce-app-inventory-service:latest
     ports:
       - "5004:5004"
     environment:
@@ -84,7 +84,7 @@ services:
       - consul
 
   notification-service:
-    build: ./notification-service
+    image: neha531/ecommerce-app-notification-service:latest
     ports:
       - "5010:5010"
     environment:
@@ -96,7 +96,7 @@ services:
       - consul
 
   order-service:
-    build: ./order-service
+    image: neha531/ecommerce-app-order-service:latest
     ports:
       - "5003:5003"
     environment:
@@ -106,9 +106,8 @@ services:
       - HOST=order-service
     depends_on:
       - consul
-
   payment-service:
-    build: ./payment-service
+    image: neha531/ecommerce-app-payment-service:latest
     ports:
       - "5005:5005"
     environment:

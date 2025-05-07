@@ -24,7 +24,7 @@ router.post('/register', async (req, res) => {
     const hashed = await bcrypt.hash(password, 10);
     const user = new User({ email, password: hashed });
     await user.save();
-    res.json({ msg: 'User registered' });
+    res.json({ msg: 'User registered', userId: user._id });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -41,7 +41,7 @@ router.post('/login', async (req, res) => {
     if (!isMatch) return res.status(400).json({ msg: 'Invalid credentials' });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-    res.json({ token });
+    res.json({ token, userId: user._id });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

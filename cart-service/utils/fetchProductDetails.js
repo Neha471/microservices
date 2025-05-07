@@ -8,7 +8,7 @@ const axios = require('axios');
 async function fetchProductDetails(productId) {
   try {
     // Adjust the URL and port if your product service runs elsewhere
-    const response = await axios.get(`http://localhost:5001/api/products/${productId}`);
+    const response = await axios.get(`http://product-service:5001/api/products/${productId}`);
     console.log(response.data);
 
     return response.data;
