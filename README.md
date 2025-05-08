@@ -20,15 +20,15 @@ The project consists of the following microservices:
 The application is accessible through the API Gateway at:
 
 ```
-http://localhost:4001
+http://localhost:4000
 ```
 
 ## Prerequisites
 
 - Docker and Docker Compose
 - Consul for service discovery
-- Java (for Spring Boot services)
-- Maven (for building services)
+- Node.js (for Node.js services)
+- NPM (for Node.js services)
 
 ## Getting Started
 
@@ -103,14 +103,5 @@ All services communicate through:
 
 Each service is independently deployable and can be developed separately. The services communicate through well-defined APIs and are loosely coupled.
 
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
 ## License
-
 This project is licensed under the MIT License - see the LICENSE file for details
