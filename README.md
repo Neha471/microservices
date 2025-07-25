@@ -1,38 +1,107 @@
-# sv
+# Microservices Architecture Project
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A distributed system built using microservices architecture, featuring multiple independent services that communicate with each other through well-defined APIs.
 
-## Creating a project
+## Project Structure
 
-If you're seeing this, you've probably already done this step. Congrats!
+The project consists of the following microservices:
 
-```bash
-# create a new project in the current directory
-npx sv create
+- `api-gateway`: Entry point for all client requests (runs on port 4000)
+- `auth-service`: Handles user authentication and authorization
+- `cart-service`: Manages shopping cart functionality
+- `inventory-service`: Manages product inventory
+- `notification-service`: Handles user notifications
+- `order-service`: Processes and manages orders
+- `payment-service`: Handles payment processing
+- `product-service`: Manages product catalog
 
-# create a new project in my-app
-npx sv create my-app
+## Accessing the Application
+
+The application is accessible through the API Gateway at:
+
+```
+http://localhost:4000
 ```
 
-## Developing
+## Prerequisites
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+- Docker and Docker Compose
+- Consul for service discovery
+- Node.js (for Node.js services)
+- NPM (for Node.js services)
+
+## Getting Started
+
+1. Clone the repository
+2. Navigate to the project directory
+
+### First Time Setup
+
+To build and run all services for the first time:
 
 ```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+docker-compose -f docker-compose.consul.yml up --build
 ```
 
-## Building
+The `--build` flag ensures all Docker images are built from scratch.
 
-To create a production version of your app:
+### Running Existing Services
+
+If you've already built the services before, you can simply run:
 
 ```bash
-npm run build
+docker-compose -f docker-compose.consul.yml up
 ```
 
-You can preview the production build with `npm run preview`.
+### Stopping Services
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+To stop all running services:
+
+```bash
+docker-compose -f docker-compose.consul.yml down
+```
+
+### Restarting Services
+
+To restart all services:
+
+```bash
+docker-compose -f docker-compose.consul.yml down && docker-compose -f docker-compose.consul.yml up
+```
+
+### Running in Background
+
+To run services in the background:
+
+```bash
+docker-compose -f docker-compose.consul.yml up -d
+```
+
+### Viewing Logs
+
+To view logs of all services:
+
+```bash
+docker-compose -f docker-compose.consul.yml logs -f
+```
+
+To view logs of a specific service (e.g., auth-service):
+
+```bash
+docker-compose -f docker-compose.consul.yml logs -f auth-service
+```
+
+## Service Communication
+
+All services communicate through:
+
+- RESTful APIs
+- Service discovery using Consul
+- API Gateway for request routing
+
+## Development
+
+Each service is independently deployable and can be developed separately. The services communicate through well-defined APIs and are loosely coupled.
+
+## License
+This project is licensed under the MIT License - see the LICENSE file for details
