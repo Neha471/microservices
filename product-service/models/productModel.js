@@ -6,6 +6,7 @@ const productSchema = new mongoose.Schema({
   price: Number,
   category: String,
   availableStock: Number,
+  image: { type: String, default: '' } // Adding image field to store product image URL
 });
 
 module.exports = mongoose.model('Product', productSchema);
