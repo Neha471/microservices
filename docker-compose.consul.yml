@@ -46,7 +46,7 @@ services:
       - CONSUL_PORT=8500
       - PORT=5000
       - HOST=auth-service
-      - MONGO_URI=mongodb+srv://neha:Neha%40123@cluster0.kfz6xfv.mongodb.net/?retryWrites=true&w=majority&appName=cluster0
+      - MONGO_URI=${MONGO_URL}
     depends_on:
       - consul
       - mongo
