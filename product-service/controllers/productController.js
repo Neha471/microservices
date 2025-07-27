@@ -27,7 +27,7 @@ exports.getProducts = async (req, res) => {
     // Build query object
     let query = {};
     if (name) query.name = new RegExp(name, 'i');
-    if (category) query.category = category;
+    if (category) query.category = new RegExp(category, 'i');
     if (minPrice || maxPrice) {
       query.price = {};
       if (minPrice) query.price.$gte = Number(minPrice);
