@@ -17,6 +17,16 @@ const createCheckoutSession = async (req, res) => {
     const amount = order.amount;
     const orderId = order.order._id;
 
+    const payment = new Payment({
+      userId,
+      amount,
+      currency: 'usd',
+      orderId,
+      status: 'PENDING',
+    });
+
+    const paymentResponse = await payment.save();
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [
@@ -32,20 +42,9 @@ const createCheckoutSession = async (req, res) => {
         },
       ],
       mode: "payment",
-      success_url: "http://localhost:5173/payment/success",
-      cancel_url: "http://localhost:5173/payment/cancel",
+      success_url: `http://localhost:5173/payment/success/?paymentId=${paymentResponse._id}&orderId=${orderId}`,
+      cancel_url: `http://localhost:5173/payment/cancel/?paymentId=${paymentResponse._id}&orderId=${orderId}`,
     });
-
-    const payment = new Payment({
-      userId,
-      stripeSessionId: session.id,
-      amount,
-      currency: 'usd',
-      orderId,
-      status: 'PENDING',
-    });
-
-    await payment.save();
 
     return { id: session.id };
   } catch (err) {
@@ -62,5 +61,17 @@ exports.processPayment = async (req, res) => {
     return res.status(200).json(result);
   } catch (err) {
     return res.status(503).json({ success: false, error: err.message });
+  }
+};
+
+
+exports.updatePaymentStatus = async (req, res) => {
+  try {
+    const { paymentId, status } = req.body;
+    const payment = await Payment.findByIdAndUpdate(paymentId, { status }, { new: true });
+    if (!payment) return res.status(404).json({ message: 'Payment not found' });
+    res.json(payment);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };

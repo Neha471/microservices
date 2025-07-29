@@ -1,13 +1,12 @@
 const Order = require('../models/orderModel');
 const Product = require('./productModel');
+const axios = require('axios');
 
 // Place order from cart
 exports.placeOrder = async (req, res) => {
   try {
     const { userId } = req.body;
-    const axios = require('axios');
-    // 1. Get cart items from cart service
-    const cartRes = await axios.get(`http://cart-service:5002/api/cart/${userId}`);
+    const cartRes = await axios.get(`http://localhost:5002/api/cart/${userId}`);
     const cart = cartRes.data;
     if (!cart.items.length) return res.status(400).json({ message: 'Cart is empty' });
 
@@ -27,71 +26,18 @@ exports.placeOrder = async (req, res) => {
       }
     }
     if (insufficientStock.length > 0) {
-      return res.status(400).json({ message: 'Inventory validation failed', details: insufficientStock });
+      return res.status(400).json({ success: false, message: 'Inventory validation failed', details: insufficientStock });
     }
-
-    // 3. Mock payment confirmation
-    const paymentSuccess = Math.random() > 0.2; // 80% chance payment succeeds
-
     // 4. Create order
-    const orderStatus = paymentSuccess ? 'Confirmed' : 'Cancelled';
+    const orderStatus = 'PENDING';
     const order = new Order({
       user: userId,
       items: cart.items.map(i => ({ product: i.product._id || i.product, quantity: i.quantity })),
       total,
       status: orderStatus,
     });
-    await order.save();
-
-    // 5. Reduce inventory if confirmed
-    if (orderStatus === 'Confirmed') {
-      for (const item of cart.items) {
-        await Product.findByIdAndUpdate(
-          item.product._id || item.product,
-          { $inc: { availableStock: -item.quantity } }
-        );
-      }
-    }
-
-    // Notify notification service on order result
-    if (orderStatus === 'Confirmed') {
-      try {
-        await axios.post('http://notification-service:5010/api/notifications/log', {
-          user: userId,
-          order: order._id,
-          message: `Order #${order._id} placed successfully!`,
-          status: 'Confirmed',
-        });
-        // Also log a system notification
-        await axios.post('http://notification-service:5010/api/notifications/log', {
-          user: null,
-          order: order._id,
-          message: `Order #${order._id} was placed by user ${userId}.`,
-          status: 'Confirmed',
-        });
-      } catch (notifyErr) {
-        console.error('Failed to notify notification service:', notifyErr.message);
-      }
-    } else if (orderStatus === 'Cancelled') {
-      try {
-        await axios.post('http://notification-service:5010/api/notifications/log', {
-          user: userId,
-          order: order._id,
-          message: `Order #${order._id} was cancelled due to payment failure or other issues.`,
-          status: 'Cancelled',
-        });
-        // Also log a system notification
-        await axios.post('http://notification-service:5010/api/notifications/log', {
-          user: null,
-          order: order._id,
-          message: `Order #${order._id} for user ${userId} was cancelled.`,
-          status: 'Cancelled',
-        });
-      } catch (notifyErr) {
-        console.error('Failed to notify notification service:', notifyErr.message);
-      }
-    }
-    res.status(201).json(order);
+    const orderRes = await order.save();
+    return res.status(201).json({ success: true, order: orderRes, amount: total });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -115,5 +61,17 @@ exports.getOrdersByUserId = async (req, res) => {
     res.status(200).json(orders);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching orders', error });
+  }
+};
+
+
+exports.updateStatusOfOrder = async (req, res) => {
+  try {
+    const { orderId, status } = req.body;
+    const order = await Order.findByIdAndUpdate(orderId, { status }, { new: true });
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
