@@ -34,7 +34,7 @@ exports.reduceInventory = async (req, res) => {
     for (const item of items) {
       const productId = item.product._id || item.product;
       // Call product service to reduce stock
-      await axios.put(`http://localhost:5001/api/products/${productId}/stock`, {
+      await axios.put(`http://product-service:5001/api/products/${productId}/stock`, {
         reduceBy: item.quantity
       });
     }

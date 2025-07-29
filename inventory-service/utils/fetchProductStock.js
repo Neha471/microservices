@@ -7,7 +7,7 @@ const axios = require('axios');
  */
 async function fetchProductStock(productId) {
   try {
-    const response = await axios.get(`http://localhost:5001/api/products/${productId}`);
+    const response = await axios.get(`http://product-service:5001/api/products/${productId}`);
     const { availableStock, price } = response.data;
     return { stock: availableStock, price: price || 0 };
   } catch (error) {

@@ -11,7 +11,7 @@ const createCheckoutSession = async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const response = await axios.post('http://localhost:5003/api/orders/place', { userId });
+    const response = await axios.post('http://order-service:5003/api/orders/place', { userId });
     const order = await response.data;
 
     const amount = order.amount;

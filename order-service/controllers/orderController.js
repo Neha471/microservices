@@ -6,7 +6,7 @@ const axios = require('axios');
 exports.placeOrder = async (req, res) => {
   try {
     const { userId } = req.body;
-    const cartRes = await axios.get(`http://localhost:5002/api/cart/${userId}`);
+    const cartRes = await axios.get(`http://cart-service:5002/api/cart/${userId}`);
     const cart = cartRes.data;
     if (!cart.items.length) return res.status(400).json({ message: 'Cart is empty' });
 
