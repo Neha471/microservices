@@ -14,7 +14,8 @@ const createCheckoutSession = async (req, res) => {
     const response = await axios.post('http://order-service:5003/api/orders/place', { userId });
     const order = await response.data;
 
-    const amount = order.amount;
+    // Ensure amount is properly formatted to 2 decimal places before any calculations
+    const amount = parseFloat(order.amount.toFixed(2));
     const orderId = order.order._id;
 
     const payment = new Payment({
@@ -36,7 +37,7 @@ const createCheckoutSession = async (req, res) => {
             product_data: {
               name: "Test Product",
             },
-            unit_amount: amount * 100,
+            unit_amount: Math.round(amount * 100), // Convert to cents (already properly formatted)
           },
           quantity: 1,
         },
@@ -44,6 +45,11 @@ const createCheckoutSession = async (req, res) => {
       mode: "payment",
       success_url: `http://localhost:5173/payment/success/?paymentId=${paymentResponse._id}&orderId=${orderId}`,
       cancel_url: `http://localhost:5173/payment/cancel/?paymentId=${paymentResponse._id}&orderId=${orderId}`,
+    });
+
+    // Update the payment with the Stripe session ID
+    await Payment.findByIdAndUpdate(paymentResponse._id, { 
+      stripeSessionId: session.id 
     });
 
     return { id: session.id };
