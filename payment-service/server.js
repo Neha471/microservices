@@ -1,10 +1,13 @@
 const express = require('express');
 const dotenv = require('dotenv');
+dotenv.config();
+
 const paymentRoutes = require('./routes/paymentRoutes');
 const cors = require('cors');
 
 //service discovery registration
 const Consul = require('consul');
+const connectDB = require('./config/db');
 //const consul = new Consul();
 const consul = new Consul({ host: process.env.CONSUL_HOST || 'consul', port: process.env.CONSUL_PORT || 8500 });
 
@@ -34,11 +37,11 @@ process.on('SIGINT', () => {
   });
 });
 //service discovery registration
-dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+connectDB();
 
 app.use('/api/payment', paymentRoutes);
 app.get('/health', (req, res) => res.send('OK'));
