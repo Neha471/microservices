@@ -68,6 +68,10 @@ const services = [
       route: "/api/notifications",
       target: "http://notification-service:5010/api/notifications/",
     },
+    {
+      route: "/api/payment",  
+      target: "http://payment-service:5005/api/payment/",
+    }
     // Add more services as needed either deployed or locally.
    ];
 
