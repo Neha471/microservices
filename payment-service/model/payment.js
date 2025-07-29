@@ -3,14 +3,9 @@ const mongoose = require('mongoose');
 
 const paymentSchema = new mongoose.Schema({
   userId: {
-    type: String, // Assuming you're using a Users collection
-    required: true,
-    ref: 'User',
-  },
-  stripeSessionId: {
     type: String,
     required: true,
-    unique: true,
+    ref: 'User',
   },
   amount: {
     type: Number,
