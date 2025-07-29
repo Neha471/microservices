@@ -3,14 +3,12 @@
 services:
   consul:
     image: consul:1.15.4
-    platform: linux/amd64
     ports:
       - "8500:8500"
     command: "agent -dev -client=0.0.0.0"
 
   mongo:
     image: mongo:latest
-    platform: linux/amd64
     ports:
       - "27017:27017"
     volumes:
@@ -18,7 +16,6 @@ services:
 
   api-gateway:
     image: neha531/ecommerce-app-api-gateway:latest
-    platform: linux/amd64
     ports:
       - "4000:4000"
     environment:
@@ -38,22 +35,20 @@ services:
 
   auth-service:
     image: neha531/ecommerce-app-auth-service:latest
-    platform: linux/amd64
     ports:
-      - "5500:5000"
+      - "5006:5000"
     environment:
       - CONSUL_HOST=consul
       - CONSUL_PORT=8500
       - PORT=5000
       - HOST=auth-service
-      - MONGO_URI=${MONGO_URL}
+      - MONGO_URI=mongodb+srv://neha:Neha%40123@cluster0.kfz6xfv.mongodb.net/?retryWrites=true&w=majority&appName=cluster0
     depends_on:
       - consul
       - mongo
 
   product-service:
     image: neha531/ecommerce-app-product-service:latest
-    platform: linux/amd64
     ports:
       - "5001:5001"
     environment:
@@ -66,7 +61,6 @@ services:
 
   cart-service:
     image: neha531/ecommerce-app-cart-service:latest
-    platform: linux/amd64
     ports:
       - "5002:5002"
     environment:
@@ -79,7 +73,6 @@ services:
 
   inventory-service:
     image: neha531/ecommerce-app-inventory-service:latest
-    platform: linux/amd64
     ports:
       - "5004:5004"
     environment:
@@ -92,7 +85,6 @@ services:
 
   notification-service:
     image: neha531/ecommerce-app-notification-service:latest
-    platform: linux/amd64
     ports:
       - "5010:5010"
     environment:
@@ -105,7 +97,6 @@ services:
 
   order-service:
     image: neha531/ecommerce-app-order-service:latest
-    platform: linux/amd64
     ports:
       - "5003:5003"
     environment:
@@ -115,10 +106,8 @@ services:
       - HOST=order-service
     depends_on:
       - consul
-
   payment-service:
     image: neha531/ecommerce-app-payment-service:latest
-    platform: linux/amd64
     ports:
       - "5005:5005"
     environment:
