@@ -9,7 +9,7 @@ const orderSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
   items: [orderItemSchema],
   total: { type: Number, required: true },
-  status: { type: String, enum: ['Confirmed', 'Cancelled', 'Pending'], default: 'Pending' },
+  status: { type: String, enum: ['CONFIRMED', 'CANCELLED', 'PENDING'], default: 'PENDING' },
   createdAt: { type: Date, default: Date.now },
 });
 
