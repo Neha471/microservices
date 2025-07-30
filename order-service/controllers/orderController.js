@@ -2,6 +2,15 @@ const Order = require('../models/orderModel');
 const Product = require('./productModel');
 const axios = require('axios');
 
+async function fetchProductDetails(productId) {
+  try {
+    // Adjust the URL and port if your product service runs elsewhere
+    const response = await axios.get(`http://product-service:5001/api/products/${productId}`);
+    return response.data;
+  } catch (error) {
+    return null;
+  }
+}
 // Place order from cart
 exports.placeOrder = async (req, res) => {
   try {
@@ -56,14 +65,36 @@ exports.getOrderById = async (req, res) => {
 
 exports.getOrdersByUserId = async (req, res) => {
   try {
-    const userId= req.user?.id;
-    if(!userId) return res.status(401).json({ error: 'Unauthorized' });
-    const orders = await Order.find({ user: userId }); // Adjust field name if needed
-    res.status(200).json(orders);
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const orders = await Order.find({ user: userId });
+
+    const enrichedOrders = await Promise.all(orders.map(async (order) => {
+      const enrichedItems = await Promise.all(order.items.map(async (item) => {
+        const product = await fetchProductDetails(item.product);
+        return {
+          ...item.toObject(),
+          product,
+        };
+      }));
+
+      return {
+        _id: order._id,
+        user: order.user,
+        status: order.status,
+        total: order.total,
+        createdAt: order.createdAt,
+        items: enrichedItems,
+      };
+    }));
+
+    res.status(200).json({ orders: enrichedOrders });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 
 exports.updateStatusOfOrder = async (req, res) => {
