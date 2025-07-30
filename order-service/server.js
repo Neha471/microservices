@@ -1,9 +1,11 @@
 const express = require('express');
 const dotenv = require('dotenv');
+dotenv.config();
+
 const mongoose = require('mongoose');
 const orderRoutes = require('./routes/orderRoutes');
 const cors = require('cors');
-
+const verifyToken = require('./middleware/verifyToken');
 //service discovery registration
 const Consul = require('consul');
 //const consul = new Consul();
@@ -36,7 +38,6 @@ process.on('SIGINT', () => {
 });
 //service discovery registration
 
-dotenv.config();
 
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Order Service MongoDB connected'))
@@ -46,6 +47,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.use(verifyToken)
 app.use('/api/orders', orderRoutes);
 
 app.get('/health', (req, res) => res.send('OK'));
