@@ -56,11 +56,12 @@ exports.getOrderById = async (req, res) => {
 
 exports.getOrdersByUserId = async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const userId= req.user?.id;
+    if(!userId) return res.status(401).json({ error: 'Unauthorized' });
     const orders = await Order.find({ user: userId }); // Adjust field name if needed
     res.status(200).json(orders);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching orders', error });
+    res.status(500).json({ error: error.message });
   }
 };
 
