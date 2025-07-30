@@ -11,7 +11,8 @@ async function register(req, res) {
         const hashed = await bcrypt.hash(password, 10);
         const user = new User({ email, password: hashed, name });
         await user.save();
-        res.json({ msg: 'User registered', userId: user._id });
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+        res.json({ token, userId: user._id });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -35,7 +36,9 @@ async function login(req, res) {
 
 async function me(req, res) {
     try {
-        const { userId } = req.body;
+        const userId = req.user?.id;
+
+        if (!userId) return res.status(401).json({ msg: 'Unauthorized' });
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ msg: 'User not found' });
     
@@ -48,7 +51,8 @@ async function me(req, res) {
 
 async function update(req, res) {
     try {
-        const { userId } = req.body;
+        const userId = req.user?.id;
+        if (!userId) return res.status(401).json({ msg: 'Unauthorized' });
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ msg: 'User not found' });
         user.name = req.body?.name || user.name;
