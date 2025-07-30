@@ -1,7 +1,9 @@
-const express = require('express');
-const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+dotenv.config();
+const express = require('express');
+const app = express();
 const authRoutes = require('./routes/auth');
+const mongoose = require('mongoose');
 const cors = require('cors');
 const Consul = require('consul');
 // const consul = new Consul();
@@ -36,18 +38,26 @@ process.on('SIGINT', () => {
 //service discovery registration
 
 dotenv.config();
-const app = express();
 
-app.use(cors());
-app.use(express.json());
-app.use('/api/auth', authRoutes);
-app.get('/health', (req, res) => res.send('OK'));
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log("MongoDB connected");
-    app.listen(process.env.PORT, () => {
-      console.log(`Auth Service running on port ${process.env.PORT}`);
-    });
   })
   .catch(err => console.error(err));
+
+
+app.use(cors());
+
+app.use(express.json());
+
+app.use('/api/auth', authRoutes);
+app.get('/health', (req, res) => res.send('OK'));
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+});
+app.listen(process.env.PORT, () => {
+  console.log(`Auth Service running on port http://localhost:${process.env.PORT}`);
+});
