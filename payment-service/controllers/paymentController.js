@@ -5,13 +5,21 @@ const Payment = require('../model/payment');
 
 const createCheckoutSession = async (req, res) => {
   try {
-    const {userId} = req.body;
+    const userId = req.user?.id;
 
-    if(!userId ){
+    if (!userId) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const response = await axios.post('http://order-service:5003/api/orders/place', { userId });
+    const authHeader = req.headers['authorization'];
+
+    if (!authHeader) {
+      return res.status(401).json({ message: 'Authorization header missing' });
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    const response = await axios.post('http://order-service:5003/api/orders/place', { userId }, { headers: { 'Authorization': `Bearer ${token}` } });
     const order = await response.data;
 
     // Ensure amount is properly formatted to 2 decimal places before any calculations
@@ -48,8 +56,8 @@ const createCheckoutSession = async (req, res) => {
     });
 
     // Update the payment with the Stripe session ID
-    await Payment.findByIdAndUpdate(paymentResponse._id, { 
-      stripeSessionId: session.id 
+    await Payment.findByIdAndUpdate(paymentResponse._id, {
+      stripeSessionId: session.id
     });
 
     return { id: session.id };
