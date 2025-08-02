@@ -51,8 +51,8 @@ const createCheckoutSession = async (req, res) => {
         },
       ],
       mode: "payment",
-      success_url: `http://localhost:5173/payment/success/?paymentId=${paymentResponse._id}&orderId=${orderId}`,
-      cancel_url: `http://localhost:5173/payment/cancel/?paymentId=${paymentResponse._id}&orderId=${orderId}`,
+      success_url: `http://localhost:3000/payment/success/?paymentId=${paymentResponse._id}&orderId=${orderId}`,
+      cancel_url: `http://localhost:3000/payment/cancel/?paymentId=${paymentResponse._id}&orderId=${orderId}`,
     });
 
     // Update the payment with the Stripe session ID
